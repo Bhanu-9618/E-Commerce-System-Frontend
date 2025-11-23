@@ -9,6 +9,7 @@ function Home() {
     const [product, setProduct] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [cartItems, setCartItems] = useState([]);
 
     const loadProducts = async () => {
         setLoading(true);
@@ -22,16 +23,37 @@ function Home() {
         } finally {
             setLoading(false);
         }
+    };
+    const addToCart = (productToAdd) => {
+        setCartItems(prevCartItems => {
 
-        useEffect(() => {
-            loadProducts();
-        }, []);
-    }
+            const existingItem = prevCartItems.find(item => item.id === productToAdd.id);
+
+            if (existingItem) {
+
+                return prevCartItems.map(item =>
+                    item.id === productToAdd.id
+                        ? { ...item, cartQty: item.cartQty + 1 }
+                        : item
+                );
+            } else {
+
+                return [...prevCartItems, { ...productToAdd, cartQty: 1 }];
+            }
+        });
+    };
+
+    useEffect(() => {
+        loadProducts();
+    }, []);
+
 
     return (
         <>
             <Navbar></Navbar>
-
+            <center>
+                <h1 className='mt-5'>All Products</h1>
+            </center>
             {loading && <div>Loading Products...</div>}
             {error && <div className="text-danger">{error}</div>}
             <table className="table mt-5">
@@ -46,15 +68,15 @@ function Home() {
                     </tr>
                 </thead>
                 <tbody>
-                    {product.map((b) =>
-                        <tr key={b.id}>
-                            <td>{b.id}</td>
-                            <td>{b.name}</td>
-                            <td>{b.description}</td>
-                            <td>{b.unitPrice}</td>
-                            <td>{b.qty}</td>
+                    {product.map((p) =>
+                        <tr key={p.id}>
+                            <td>{p.id}</td>
+                            <td>{p.name}</td>
+                            <td>{p.description}</td>
+                            <td>{p.unitPrice}</td>
+                            <td>{p.qty}</td>
                             <td>
-                                <input type="button" value="Add to Cart" />
+                                <input type="button" value="Add to Cart" onClick={() => addToCart(p)} />
                             </td>
                         </tr>
                     )}
@@ -66,6 +88,34 @@ function Home() {
                     Reload
                 </button>
             </center>
+            <center className='mt-5'>
+                <h1>Cart</h1>
+            </center>
+
+            <table className="table mt-5">
+                <thead>
+                    <tr>
+                        <th scope="col">Product ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Unit Price</th>
+                        <th scope="col">Cart Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {cartItems.map((item) => (
+                        <tr key={item.id}>
+                            <td>{item.id}</td>
+                            <td>{item.name}</td>
+                            <td>{item.description}</td>
+                            <td>{item.unitPrice}</td>
+                            <td>{item.cartQty}</td> 
+                        </tr>
+                    ))}
+
+                </tbody>
+            </table>
+
 
         </>
     )
